@@ -15,6 +15,7 @@
 
 (defun json-response (data &optional (status 200))
   "Create a JSON HTTP response."
+  (log:info "Converting json ~A" (json:encode-json-to-string data))
   (list status
         '(:content-type "application/json")
         (list (json:encode-json-to-string data))))
@@ -35,12 +36,12 @@
                 (let ((user (funcall create-user name email)))
                   (json-response
                     (alexandria:plist-hash-table
-                    '("message" "User created successfully"
-                      "user" (("id" . (lisp-crud.domain.entities:user-id user))
-                              ("name" . (lisp-crud.domain.entities:user-name user))
-                              ("email" . (lisp-crud.domain.entities:user-email user))))
+                      `("message" "User created successfully"
+                        "user" ,(alexandria:plist-hash-table `("id" ,(lisp-crud.domain.entities:user-id user)
+                        "name" ,(lisp-crud.domain.entities:user-name user)
+                        "email" ,(lisp-crud.domain.entities:user-email user))))
                     :test #'equal)
-                    201)))
+                  201)))
             (error (e)
               (log:error "Error creating user: ~a" e)
               (json-response
