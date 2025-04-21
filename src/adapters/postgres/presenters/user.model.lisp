@@ -18,9 +18,3 @@
   (list :id    (format nil "~A" (lisp-crud.domain.entities:user-id user))
         :name  (lisp-crud.domain.entities:user-name user)
         :email (lisp-crud.domain.entities:user-email user)))
-
-
-(defun entity->update-params (user)
-  "Convert entity to SQL UPDATE parameters (for :set clause)"
-  (list :name  (lisp-crud.domain.entities:user-name user)
-        :email (lisp-crud.domain.entities:user-email user)))

@@ -50,7 +50,9 @@
      :serial t
      :components (
        (:file "package")
-       (:file "create-user.usecase")))
+       (:file "create-user.usecase")
+       (:file "delete-user.usecase")
+       (:file "update-user.usecase")))
     
     ;; Adapters - implementation of ports
     (:module "src/adapters/postgres"

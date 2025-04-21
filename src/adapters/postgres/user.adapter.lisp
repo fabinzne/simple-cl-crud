@@ -17,17 +17,22 @@
                             'email (getf params :email)))
   user))
 
-(defmethod delete-user ((repo postgres-user-repository) user)
-  (postmodern:with-connection (conn)
-    (postmodern:execute conn "DELETE FROM entities WHERE id = $1"
-                        (lisp-crud.domain.entities:user-id user))))
+(defmethod delete-user ((repo postgres-user-repository) id)
+  (postmodern:query (:delete-from 'users :where (:= 'id id))))
 
 (defmethod update-user ((repo postgres-user-repository) user)
-  (postmodern:with-connection (conn)
-    (postmodern:execute conn "UPDATE entities SET name = $2, email = $3 WHERE id = $1"
-                        (lisp-crud.domain.entities:user-id user)
-                        (lisp-crud.domain.entities:user-name user)
-                        (lisp-crud.domain.entities:user-email user))))
+  (log:info "Updating user: ~A ~A ~A"
+            (lisp-crud.domain.entities:user-id user)
+            (lisp-crud.domain.entities:user-name user)
+            (lisp-crud.domain.entities:user-email user))
+  (let ((params (entity->db-record user)))
+    (log:info "Params to UPDATE ~A ~A ~A"
+              (getf params :id) (getf params :name) (getf params :email))
+    (postmodern:query 
+      (:update 'users :set 'name (getf params :name)
+                            'email (getf params :email)
+                      :where (:= 'id (getf params :id))))
+  user))
 
 (defmethod find-by-id ((repo postgres-user-repository) id)
   (postmodern:with-connection (conn)

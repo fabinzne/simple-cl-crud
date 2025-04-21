@@ -1,7 +1,7 @@
 # Makefile
 .PHONY: all build run clean
 
-run: down up
+run:
 	sbcl --load run-server.lisp
 
 up:
