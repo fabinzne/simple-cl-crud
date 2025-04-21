@@ -37,3 +37,11 @@
           (destructuring-bind (id name email) (first result)
             (make-user id name email))
           nil))))
+
+(defmethod find-all-users ((repo postgres-user-repository))
+  (postmodern:with-connection (conn)
+    (let ((results (postmodern:query conn "SELECT id, name, email FROM entities")))
+      (mapcar #'(lambda (row)
+                  (destructuring-bind (id name email) row
+                    (make-user id name email)))
+              results))))
