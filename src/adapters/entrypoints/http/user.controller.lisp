@@ -1,0 +1,60 @@
+(in-package #:lisp-crud.adapters.entrypoints.http)
+
+(defvar *app* (make-instance 'ningle:app))
+
+(defun parse-json-body (request)
+  "Parse the JSON request body to a Lisp hash table."
+  (let ((body-params (lack.request:request-body-parameters request)))
+    (cond
+      ((hash-table-p body-params) body-params)
+      ((and (listp body-params) (consp (car body-params)))
+        ;; Convert the alist to hash table
+        (alexandria:alist-hash-table body-params :test #'equal))
+      ((stringp body-params) (cl-json:decode-json-from-string body-params))
+      (t (error "Unknown body type: ~a" body-params)))))
+
+(defun json-response (data &optional (status 200))
+  "Create a JSON HTTP response."
+  (list status
+        '(:content-type "application/json")
+        (list (json:encode-json-to-string data))))
+
+(defun register-user-endpoints (app usecases)
+  "Register all user-related endpoints on the given app."
+  
+  ;; POST /api/users - Create a new user
+  (setf (ningle:route app "/api/users" :method :POST)
+        (lambda (params)
+          (declare (ignore params))
+          (handler-case
+              (let* ((body (parse-json-body ningle:*request*))
+                      (name (gethash "name" body))
+                      (email (gethash "email" body))
+                      (create-user (getf usecases :create-user)))
+                (log:info "Received body: ~A name: ~A and email: ~A" body name email)
+                (let ((user (funcall create-user name email)))
+                  (json-response
+                    (alexandria:plist-hash-table
+                    '("message" "User created successfully"
+                      "user" (("id" . (lisp-crud.domain.entities:user-id user))
+                              ("name" . (lisp-crud.domain.entities:user-name user))
+                              ("email" . (lisp-crud.domain.entities:user-email user))))
+                    :test #'equal)
+                    201)))
+            (error (e)
+              (log:error "Error creating user: ~a" e)
+              (json-response
+                (alexandria:plist-hash-table
+                `("error" ,(format nil "Failed to create user: ~a" e))
+                :test #'equal)
+                500))))))
+
+
+(defun user-controller ()
+  "Return the user controller instance."
+  *app*)
+
+(defun register-entrypoints (app usecases)
+  "Register all endpoints on the given app."
+  (register-user-endpoints app usecases)
+  app)

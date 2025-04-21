@@ -1,0 +1,45 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgresql
+    environment:
+      POSTGRES_USER: ${DB_USER:-admin}
+      POSTGRES_PASSWORD: ${DB_PASS:-admin}
+      POSTGRES_DB: ${DB_NAME:-lisp_crud}
+      POSTGRES_HOST_AUTH_METHOD: trust
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${DB_USER:-admin} -d ${DB_NAME:-lisp_crud}",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - ./podman/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./podman/postgres/postgresql.conf:/etc/postgresql/postgresql.conf
+    command: ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+    networks:
+      - lisp-net
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@example.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+    ports:
+      - "${PGADMIN_PORT:-5480}:80"
+    volumes:
+      - ./podman/pgadmin/pgadmin-config.json:/pgadmin4/pgadmin4-config.json
+    depends_on:
+      - postgres
+    networks:
+      - lisp-net
+
+networks:
+  lisp-net:
+    driver: bridge

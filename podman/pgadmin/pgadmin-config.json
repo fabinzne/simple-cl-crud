@@ -1,0 +1,14 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "Lsip Crud",
+      "Group": "Servers",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "postgres",
+      "Username": "admin",
+      "Password": "admin",
+      "SSLMode": "prefer"
+    }
+  }
+}
