@@ -5,5 +5,4 @@
            #:connect
            #:disconnect
            #:migrate
-           #:*db-connection*
-           #:find-user-by-id))
+           #:*db-connection*))
