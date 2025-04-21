@@ -8,7 +8,7 @@
 (defvar *server-thread* nil)
 (defvar *file-watcher-thread* nil)
 (defvar *last-reload-time* (get-universal-time))
-(defvar *watch-directories* '("src/" "templates/" "static/"))  ;; Update these paths to match your project structure
+(defvar *watch-directories* '("src/" "templates/" "static/"))
 (defvar *file-timestamps* (make-hash-table :test 'equal))
 
 (defun collect-files-to-watch ()
